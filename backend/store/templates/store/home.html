@@ -1,0 +1,473 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- HERO SLIDER -->
+<div id="homeCarousel" class="carousel slide mb-4" data-bs-ride="carousel">
+  {% if banners %}
+    <div class="carousel-indicators">
+      {% for banner in banners %}
+        <button type="button" data-bs-target="#homeCarousel" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}"></button>
+      {% endfor %}
+    </div>
+
+    <div class="carousel-inner">
+      {% for banner in banners %}
+        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+          {% if banner.link %}
+            <a href="{{ banner.link }}">
+              <img src="{{ banner.image.url }}" class="d-block w-100" alt="{{ banner.title|default:'Lenskart Banner' }}">
+            </a>
+          {% else %}
+            <img src="{{ banner.image.url }}" class="d-block w-100" alt="{{ banner.title|default:'Lenskart Banner' }}">
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <button class="carousel-control-prev" type="button" data-bs-target="#homeCarousel" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon"></span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#homeCarousel" data-bs-slide="next">
+    <span class="carousel-control-next-icon"></span>
+  </button>
+</div>
+
+<!-- TOP CATEGORIES -->
+<div class="container mb-5">
+  <h3 class="mb-3">Top Categories</h3>
+  <div class="lk-top-categories">
+    <div class="lk-cat-card">
+      <img src="https://static5.lenskart.com/media/uploads/eyeglasses-top-grid-080126.png" alt="Eyeglasses">
+      <span>Eyeglasses</span>
+      <div class="lk-cat-menu">
+        <a href="{% url 'shape_gender' 'square' 'men' %}"><img src="https://static5.lenskart.com/media/uploads/Eye-Square-bottomsheet-080126.png" alt="Square">Square</a>
+        <a href="{% url 'shape_gender' 'rectangle' 'men' %}"><img src="https://static5.lenskart.com/media/uploads/Eye-Rectangle-bottomsheet-080126.png" alt="Rectangle">Rectangle</a>
+        <a href="{% url 'shape_gender' 'round' 'men' %}"><img src="https://static5.lenskart.com/media/uploads/Eye-Round-bottomsheet-080126.png" alt="Round">Round</a>
+        <a href="{% url 'shape_gender' 'geometric' 'men' %}"><img src="https://static5.lenskart.com/media/uploads/Eye-Geometric-bottomsheet-080126.png" alt="Geometric">Geometric</a>
+        <a href="{% url 'category' 'eyeglasses' %}" class="lk-all-shapes">View all shapes</a>
+      </div>
+    </div>
+    <div class="lk-cat-card">
+      <img src="https://static5.lenskart.com/media/uploads/sun-grid-080126.png" alt="Sunglasses">
+      <span>Sunglasses</span>
+      <div class="lk-cat-menu">
+        <a href="{% url 'shape_gender' 'square' 'men' %}?category=sunglasses"><img src="https://static5.lenskart.com/media/uploads/Sun-Square-bottomsheet-080126.png" alt="Square">Square</a>
+        <a href="{% url 'shape_gender' 'rectangle' 'men' %}?category=sunglasses"><img src="https://static5.lenskart.com/media/uploads/Sun-Rectangle-bottomsheet-080126.png" alt="Rectangle">Rectangle</a>
+        <a href="{% url 'shape_gender' 'round' 'men' %}?category=sunglasses"><img src="https://static5.lenskart.com/media/uploads/Sun-Round-bottomsheet-080126.png" alt="Round">Round</a>
+        <a href="{% url 'shape_gender' 'geometric' 'men' %}?category=sunglasses"><img src="https://static5.lenskart.com/media/uploads/Sun-Geometric-bottomsheet-080126.png" alt="Geometric">Geometric</a>
+        <a href="{% url 'category' 'sunglasses' %}" class="lk-all-shapes">View all shapes</a>
+      </div>
+    </div>
+    <div class="lk-cat-card">
+      <img src="https://static5.lenskart.com/media/uploads/special-grid-080126.png" alt="Special Power">
+      <span>Special Power</span>
+      <div class="lk-cat-menu">
+        <a href="#"><img src="https://static5.lenskart.com/media/uploads/Special-Power-01-bottomsheet-080126.png" alt="Zero Power">Zero Power</a>
+        <a href="#"><img src="https://static5.lenskart.com/media/uploads/Special-Power-02-bottomsheet-080126.png" alt="Progressive">Progressive</a>
+        <a href="#"><img src="https://static5.lenskart.com/media/uploads/Special-Power-03-bottomsheet-080126.png" alt="Reading">Reading</a>
+        <a href="#"><img src="https://static5.lenskart.com/media/uploads/Special-Power-04-bottomsheet-080126.png" alt="Power Sun">Power Sun</a>
+      </div>
+    </div>
+    <div class="lk-cat-card">
+      <img src="https://static5.lenskart.com/media/uploads/cl-grid-080126.png" alt="Contact Lenses">
+      <span>Contact Lenses</span>
+      <div class="lk-cat-menu">
+        <a href="#"><img src="https://static5.lenskart.com/media/uploads/CL-01-bottomsheet-080126.png" alt="Clear">Clear</a>
+        <a href="#"><img src="https://static5.lenskart.com/media/uploads/CL-02-bottomsheet-080126.png" alt="Color">Color</a>
+        <a href="#"><img src="https://static5.lenskart.com/media/uploads/CL-03-bottomsheet-080126.png" alt="Solutions">Solutions</a>
+        <a href="#"><img src="https://static5.lenskart.com/media/uploads/CL-04-bottomsheet-080126.png" alt="Accessories">Accessories</a>
+      </div>
+    </div>
+    <div class="lk-cat-card">
+      <img src="https://static5.lenskart.com/media/uploads/kids-grid-080126.png" alt="Kids Glasses">
+      <span>Kids Glasses</span>
+      <div class="lk-cat-menu">
+        <a href="#"><img src="https://static5.lenskart.com/media/uploads/Kids-01-bottomsheet-080126.png" alt="2-5 years">2 - 5 years</a>
+        <a href="#"><img src="https://static5.lenskart.com/media/uploads/Kids-02-bottomsheet-080126.png" alt="5-8 years">5 - 8 years</a>
+        <a href="#"><img src="https://static5.lenskart.com/media/uploads/Kids-03-bottomsheet-080126.png" alt="8-12 years">8 - 12 years</a>
+        <a href="#"><img src="https://static5.lenskart.com/media/uploads/Kids-04-bottomsheet-080126.png" alt="12-17 years">12 - 17 years</a>
+      </div>
+    </div>
+    <div class="lk-cat-card">
+      <img src="https://static5.lenskart.com/media/uploads/sale-grid-080126.png" alt="Sale">
+      <span>Sale</span>
+    </div>
+  </div>
+</div>
+
+<!-- COUPON BANNER -->
+<div class="container mb-5">
+  {% if special_banners %}
+    <div id="promoBannerCarousel" class="carousel slide rounded" data-bs-ride="carousel" data-bs-interval="4500">
+      <div class="carousel-inner rounded">
+        {% for banner in special_banners %}
+          <div class="carousel-item {% if forloop.first %}active{% endif %}">
+            {% if banner.link %}
+              <a href="{{ banner.link }}">
+                <img src="{{ banner.image.url }}" class="d-block w-100" alt="{{ banner.title|default:'Promo Banner' }}">
+              </a>
+            {% else %}
+              <img src="{{ banner.image.url }}" class="d-block w-100" alt="{{ banner.title|default:'Promo Banner' }}">
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+      {% if special_banners|length > 1 %}
+        <button class="carousel-control-prev" type="button" data-bs-target="#promoBannerCarousel" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#promoBannerCarousel" data-bs-slide="next">
+          <span class="carousel-control-next-icon"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      {% endif %}
+    </div>
+  {% else %}
+    <img src="https://static5.lenskart.com/media/uploads/desktop-flr-banner-1612.png" class="img-fluid w-100 rounded" alt="50% Off Coupon Banner">
+  {% endif %}
+</div>
+
+<!-- GET THE PERFECT SHAPE - EYEGLASSES -->
+<div class="container mb-5">
+  <h3 class="mb-4">Get the perfect shape - Eyeglasses</h3>
+  <div class="lk-shape-grid">
+    <a class="lk-shape-card" href="{% url 'shape_gender' 'rectangle' 'men' %}">
+      <div class="lk-shape-circle">
+        <img src="https://static5.lenskart.com/media/uploads/Rectangledesktop-18-12.png" alt="Rectangle">
+      </div>
+      <span>Rectangle</span>
+    </a>
+    <a class="lk-shape-card" href="{% url 'shape_gender' 'cat-eye' 'men' %}">
+      <div class="lk-shape-circle">
+        <img src="https://static5.lenskart.com/media/uploads/Cateyedesktop-18-12.png" alt="Cateye">
+      </div>
+      <span>Cateye</span>
+    </a>
+    <a class="lk-shape-card" href="{% url 'shape_gender' 'aviator' 'men' %}">
+      <div class="lk-shape-circle">
+        <img src="https://static5.lenskart.com/media/uploads/Aviatordesktop-18-12.png" alt="Aviator">
+      </div>
+      <span>Aviator</span>
+    </a>
+    <a class="lk-shape-card" href="{% url 'shape_gender' 'geometric' 'men' %}">
+      <div class="lk-shape-circle">
+        <img src="https://static5.lenskart.com/media/uploads/Geometricdesktop-18-12.png" alt="Geometric">
+      </div>
+      <span>Geometric</span>
+    </a>
+    <a class="lk-shape-card" href="{% url 'shape_gender' 'round' 'men' %}">
+      <div class="lk-shape-circle">
+        <img src="https://static5.lenskart.com/media/uploads/Rounddesktop-18-12.png" alt="Round">
+      </div>
+      <span>Round</span>
+    </a>
+    <a class="lk-shape-card" href="{% url 'shape_gender' 'clubmaster' 'men' %}">
+      <div class="lk-shape-circle">
+        <img src="https://static5.lenskart.com/media/uploads/Clubmasterdesktop-18-12.png" alt="Clubmaster">
+      </div>
+      <span>Clubmaster</span>
+    </a>
+    <a class="lk-shape-card" href="{% url 'shape_gender' 'square' 'men' %}">
+      <div class="lk-shape-circle">
+        <img src="https://static5.lenskart.com/media/uploads/square-desktop-060126.png" alt="Square">
+      </div>
+      <span>Square</span>
+    </a>
+  </div>
+</div>
+
+<!-- PLACEHOLDER: #Trending at Lenskart -->
+<div class="container mb-5">
+  <div class="py-4"></div>
+</div>
+
+<!-- FACE SHAPE (SUNGLASSES) -->
+<div class="container mb-5">
+  <h3 class="mb-4">Get the perfect shape - Sunglasses</h3>
+  <div class="lk-shape-grid">
+    <a class="lk-shape-card" href="{% url 'shape_gender' 'aviator' 'men' %}?category=sunglasses">
+      <div class="lk-shape-circle">
+        <img src="https://static5.lenskart.com/media/uploads/Aviator-IN-desktop-060126.png" alt="Aviator">
+      </div>
+      <span>Aviator</span>
+    </a>
+    <a class="lk-shape-card" href="{% url 'shape_gender' 'round' 'men' %}?category=sunglasses">
+      <div class="lk-shape-circle">
+        <img src="https://static5.lenskart.com/media/uploads/Round-IN-desktop-060126.png" alt="Round">
+      </div>
+      <span>Round</span>
+    </a>
+    <a class="lk-shape-card" href="{% url 'shape_gender' 'rectangle' 'men' %}?category=sunglasses">
+      <div class="lk-shape-circle">
+        <img src="https://static5.lenskart.com/media/uploads/Rectangle-IN-desktop-060126.png" alt="Rectangle">
+      </div>
+      <span>Rectangle</span>
+    </a>
+    <a class="lk-shape-card" href="{% url 'shape_gender' 'cat-eye' 'men' %}?category=sunglasses">
+      <div class="lk-shape-circle">
+        <img src="https://static5.lenskart.com/media/uploads/cat-eye-IN-desktop-060126.png" alt="Cat Eye">
+      </div>
+      <span>Cat Eye</span>
+    </a>
+    <a class="lk-shape-card" href="{% url 'shape_gender' 'geometric' 'men' %}?category=sunglasses">
+      <div class="lk-shape-circle">
+        <img src="https://static5.lenskart.com/media/uploads/Geometric-IN-desktop-060126.png" alt="Geometric">
+      </div>
+      <span>Geometric</span>
+    </a>
+    <a class="lk-shape-card" href="{% url 'shape_gender' 'clubmaster' 'men' %}?category=sunglasses">
+      <div class="lk-shape-circle">
+        <img src="https://static5.lenskart.com/media/uploads/Clubmaster-IN-desktop-060126.png" alt="Clubmaster">
+      </div>
+      <span>Clubmaster</span>
+    </a>
+    <a class="lk-shape-card" href="{% url 'shape_gender' 'square' 'men' %}?category=sunglasses">
+      <div class="lk-shape-circle">
+        <img src="https://static5.lenskart.com/media/uploads/square-IN-desktop-060126.png" alt="Square">
+      </div>
+      <span>Square</span>
+    </a>
+  </div>
+</div>
+
+<!-- NEARBY STORES & SERVICES -->
+<div class="container mb-5">
+  <h3 class="mb-3">Nearby Stores & Services</h3>
+  <div class="lk-service-grid">
+    <div class="lk-service-card">
+      <div>
+        <span class="lk-service-pill">Try in store</span>
+        <div class="lk-service-title">Visit Your<br>Nearest Store</div>
+      </div>
+      <div class="d-flex justify-content-between align-items-end">
+        <a class="lk-service-arrow" href="{% url 'stores_lenskart' %}">→</a>
+        <div class="lk-service-media">
+          <img src="https://static5.lenskart.com/media/uploads/visit-store-IN-desktop-060126.png" alt="Visit Store">
+        </div>
+      </div>
+    </div>
+    <div class="lk-service-card">
+      <div>
+        <span class="lk-service-pill">In 60 mins</span>
+        <div class="lk-service-title">Experience Our<br>Home Try-On</div>
+      </div>
+      <div class="d-flex justify-content-between align-items-end">
+        <a class="lk-service-arrow" href="{% url 'home_eye_test' %}">→</a>
+        <div class="lk-service-media">
+          <img src="https://static5.lenskart.com/media/uploads/hto-IN-desktop-060126.png" alt="Home Try-On">
+        </div>
+      </div>
+    </div>
+    <div class="lk-service-card">
+      <div>
+        <span class="lk-service-pill">84478-21891</span>
+        <div class="lk-service-title">Order Now<br>on WhatsApp</div>
+      </div>
+      <div class="d-flex justify-content-between align-items-end">
+        <a class="lk-service-arrow" href="https://api.whatsapp.com/send?phone=918447821891&text=Hi%20Lenskart%2C%20I%20am%20on%20Desktop.%20Can%20you%20guide%20me%3F" target="_blank" rel="noopener">→</a>
+        <div class="lk-service-media">
+          <img src="https://static5.lenskart.com/media/uploads/whatsapp-banner-IN-desktop-060126.png" alt="WhatsApp">
+        </div>
+      </div>
+    </div>
+    <div class="lk-service-card">
+      <div>
+        <span class="lk-service-pill">99998-99998</span>
+        <div class="lk-service-title">Connect with<br>your Experts</div>
+      </div>
+      <div class="d-flex justify-content-between align-items-end">
+        <a class="lk-service-arrow" href="tel:+919999899998">→</a>
+        <div class="lk-service-media">
+          <img src="https://static5.lenskart.com/media/uploads/call-expert-IN-desktop-060126.png" alt="Call Expert">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXCLUSIVELY AT LENSKART -->
+<div class="container mb-5">
+  <h3 class="mb-3">Exclusively at Lenskart</h3>
+  {% if exclusive_banners %}
+    <div class="row g-3">
+      {% for banner in exclusive_banners %}
+        <div class="col-md-4">
+          {% if banner.link %}
+            <a href="{{ banner.link }}">
+              <img src="{{ banner.image.url }}" class="img-fluid rounded w-100" alt="{{ banner.title|default:'Exclusive Banner' }}">
+            </a>
+          {% else %}
+            <a href="{% url 'promo_jj_stranger_things' %}">
+              <img src="{{ banner.image.url }}" class="img-fluid rounded w-100" alt="{{ banner.title|default:'Exclusive Banner' }}">
+            </a>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    
+  {% endif %}
+</div>
+
+{% if exclusive_products %}
+  <div class="container mb-5">
+    <h3 class="mb-3">Our Own Products</h3>
+    <div class="lk-exclusive-product-grid">
+      {% for product in exclusive_products %}
+        <div class="lk-exclusive-product-card">
+          <a class="lk-exclusive-product-media-link" href="{% url 'product_detail' product.slug %}">
+            <div class="lk-exclusive-product-media">
+              {% with image=product.get_primary_image %}
+                {% if image %}
+                  <img src="{{ image.image.url }}" alt="{{ product.name }}">
+                {% else %}
+                  <div class="lk-exclusive-product-media-placeholder">Image</div>
+                {% endif %}
+              {% endwith %}
+            </div>
+          </a>
+          <div class="lk-exclusive-product-card-body">
+            <div class="lk-exclusive-product-brand">
+              {% if product.brand %}
+                {{ product.brand.name }}
+              {% else %}
+                Lenskart
+              {% endif %}
+            </div>
+            <div class="lk-exclusive-product-name">{{ product.name }}</div>
+            <div class="lk-exclusive-product-price">Starts at ₹{{ product.get_display_price }}</div>
+            <a href="{% url 'product_detail' product.slug %}" class="btn btn-outline-dark btn-sm lk-exclusive-product-cta">Shop</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+
+<!-- PREMIUM EYEWEAR -->
+<div class="container mb-5">
+  <div class="lk-premium-section">
+    <div class="lk-premium-hero">
+      <div class="lk-premium-hero-copy">
+        <!-- <span class="lk-premium-hero-label">FEATURED</span> -->
+        <div class="lk-premium-hero-tagline"></div>
+      </div>
+      <div class="lk-premium-hero-visual">
+        <img src="/media/products/Meller-1920x520desktop_tiny_-18-12.jpg" alt="Fossil Premium Banner">
+      </div>
+    </div>
+
+    <div class="lk-premium-slider-header">
+      <div>
+        <div class="text-uppercase small text-muted">Exclusive frames</div>
+      </div>
+      <a href="{% url 'promo_jj_stranger_things' %}" class="btn btn-outline-light btn-sm">Shop the drop</a>
+    </div>
+
+    <div class="lk-premium-scroll lk-fossil-scroll">
+      {% for product in fossil_products %}
+        <article class="lk-fossil-card">
+          <div class="lk-fossil-card-img">
+            {% with img=product.get_primary_image %}
+              {% if img %}
+                <img src="{{ img.image.url }}" alt="{{ product.name }}">
+              {% else %}
+                <div class="lk-premium-scroll-placeholder">Image</div>
+              {% endif %}
+            {% endwith %}
+          </div>
+          <div class="lk-fossil-card-body">
+            <div class="lk-fossil-sku">#{{ product.id|default:"000000" }}</div>
+            <div class="lk-fossil-brand">
+              {% if product.brand %}
+                {{ product.brand.name }}
+              {% else %}
+                Lenskart
+              {% endif %}
+            </div>
+            <div class="lk-fossil-name">{{ product.name }}</div>
+            <div class="lk-fossil-price">Rs {{ product.get_display_price }}</div>
+            <a href="{% url 'product_detail' product.slug %}" class="btn btn-outline-dark btn-sm lk-fossil-view">View</a>
+          </div>
+        </article>
+      {% empty %}
+        <div class="text-white small">No Fossil frames found.</div>
+      {% endfor %}
+    </div>
+
+    <div class="lk-premium-strip">
+    </div>
+  </div>
+</div>
+
+<!-- OUR BRANDS -->
+<div class="container mb-5">
+  <h3 class="mb-3">Our Brands</h3>
+  {% if brand_cards %}
+    <div class="lk-brand-grid">
+      {% for brand in brand_cards %}
+        <a class="lk-brand-card" href="{% url 'brand_listing' brand.slug %}">
+          <div class="lk-brand-card-media">
+            {% if brand.logo %}
+              <img src="{{ brand.logo.url }}" alt="{{ brand.name }}">
+            {% else %}
+              <div class="lk-brand-card-placeholder">
+                <span>{{ brand.name }}</span>
+              </div>
+            {% endif %}
+          </div>
+          <div class="lk-brand-card-caption">
+            <span class="lk-brand-title">{{ brand.name }}</span>
+            {% if brand.min_price %}
+              <!-- <span class="lk-brand-price">Starts at ₹{{ brand.min_price|floatformat:0 }}</span> -->
+            {% endif %}
+            <span class="lk-brand-shop">Shop</span>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    
+  {% endif %}
+</div>
+
+<!-- GET A FREE EYE CHECKUP -->
+<div class="container mb-5">
+  <h3 class="mb-3">Get a FREE Eye Check Up</h3>
+    <div class="lk-eyecheck-grid">
+      <a class="lk-eyecheck-card" href="{% url 'stores_lenskart' %}">
+      <img src="https://static5.lenskart.com/media/uploads/Store-Eye-Test-5X6desktop-18-12.png" alt="Visit Nearest Store">
+      <div class="lk-eyecheck-body">
+        <div class="lk-eyecheck-title">Visit Nearest Store</div>
+        <div class="lk-eyecheck-sub">Walk in for quick eye test</div>
+        <span class="lk-eyecheck-arrow">→</span>
+      </div>
+    </a>
+    <a class="lk-eyecheck-card" href="{% url 'home_eye_test' %}">
+      <img src="https://static5.lenskart.com/media/uploads/Home-Eye-Test-5X6desktop-18-12-AV.png" alt="Schedule at Home">
+      <div class="lk-eyecheck-body">
+        <div class="lk-eyecheck-title">Schedule at Home</div>
+        <div class="lk-eyecheck-sub">Try 1000+ frames</div>
+        <span class="lk-eyecheck-arrow">→</span>
+      </div>
+    </a>
+    <a class="lk-eyecheck-card" href="{% url 'home_eye_test' %}">
+      <img src="https://static5.lenskart.com/media/uploads/Online-Eye-Test-5X6desktop-18-12.png" alt="Take an Online Eye Test">
+      <div class="lk-eyecheck-body">
+        <div class="lk-eyecheck-title">Take an Online Eye Test</div>
+        <div class="lk-eyecheck-sub">Anytime, anywhere</div>
+        <span class="lk-eyecheck-arrow">→</span>
+      </div>
+    </a>
+  </div>
+</div>
+
+<div class="container mb-5">
+  <img src="https://static5.lenskart.com/media/uploads/do-more-be-more-070126.png" class="img-fluid w-100 rounded" alt="Do More Be More">
+</div>
+
+{% endblock %}

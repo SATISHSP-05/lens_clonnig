@@ -1,0 +1,341 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>{% block title %}Lenskart Clone{% endblock %}</title>
+  <link rel="icon" href="/media/products/title-img.png" type="image/png">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="{% static 'css/base.css' %}" rel="stylesheet">
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <script>
+    function setCookie(name, value, days = 7) {
+      var expires = "";
+      if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+        expires = "; expires=" + date.toUTCString();
+      }
+      document.cookie = name + "=" + encodeURIComponent(value || "") + expires + "; path=/";
+    }
+
+    function getCookie(name) {
+      var match = document.cookie.match(new RegExp("(^|;)\\s*" + name + "=([^;]+)"));
+      return match ? decodeURIComponent(match[2]) : "";
+    }
+
+    function deleteCookie(name) {
+      document.cookie = name + "=; Max-Age=0; path=/";
+    }
+  </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      [
+        "access_token",
+        "refresh_token",
+        "lkTryOnPhoto",
+        "lkHtoAddresses",
+        "lkHtoSelectedAddress",
+        "lkHtoDateTime",
+      ].forEach(function (key) {
+        if (window.localStorage) {
+          localStorage.removeItem(key);
+        }
+      });
+    });
+  </script>
+
+  {% include 'navbar.html' %}
+
+  <div class="mt-3">
+    <div class="lk-page-shell">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+
+  {% include 'footer.html' %}
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  {% block extra_js %}{% endblock %}
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var modalEl = document.getElementById("lkTryOnModal");
+      if (!modalEl) return;
+      var step1 = modalEl.querySelector("[data-step='1']");
+      var step2 = modalEl.querySelector("[data-step='2']");
+      var takeBtn = modalEl.querySelector("[data-action='take']");
+      var viewBtn = modalEl.querySelector("[data-action='view']");
+      var resetBtn = modalEl.querySelectorAll("[data-action='reset']");
+      var video = document.getElementById("lkTryOnVideo");
+      var canvas = document.getElementById("lkTryOnCanvas");
+      var thumb = document.getElementById("lkTryOnThumb");
+      var stream = null;
+
+      function showStep(step) {
+        [step1, step2].forEach(function (el) {
+          if (!el) return;
+          el.classList.remove("active");
+        });
+        if (step === 1 && step1) step1.classList.add("active");
+        if (step === 2 && step2) step2.classList.add("active");
+      }
+
+      function startCamera() {
+        if (!video || stream) return;
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(function (mediaStream) {
+            stream = mediaStream;
+            video.srcObject = mediaStream;
+          })
+          .catch(function () {
+            // If permission denied, keep placeholder state.
+          });
+      }
+
+      function stopCamera() {
+        if (!stream) return;
+        stream.getTracks().forEach(function (track) {
+          track.stop();
+        });
+        stream = null;
+      }
+
+      if (takeBtn && canvas && video && thumb) {
+        takeBtn.addEventListener("click", function () {
+          var width = video.videoWidth || 640;
+          var height = video.videoHeight || 480;
+          canvas.width = width;
+          canvas.height = height;
+          var ctx = canvas.getContext("2d");
+          ctx.drawImage(video, 0, 0, width, height);
+          var dataUrl = canvas.toDataURL("image/png");
+          thumb.src = dataUrl;
+          setCookie("lkTryOnPhoto", dataUrl, 7);
+          showStep(2);
+        });
+      }
+      if (viewBtn) {
+        viewBtn.addEventListener("click", function () {
+          var url = new URL(window.location.origin + "/search/");
+          url.searchParams.set("tryon", "1");
+          window.location.href = url.toString();
+        });
+      }
+      resetBtn.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          showStep(1);
+        });
+      });
+
+      modalEl.addEventListener("shown.bs.modal", function () {
+        showStep(1);
+        startCamera();
+      });
+      modalEl.addEventListener("hidden.bs.modal", function () {
+        showStep(1);
+        stopCamera();
+      });
+    });
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var url = new URL(window.location.href);
+      var tryon = url.searchParams.get("tryon") === "1";
+      if (tryon) {
+        document.body.classList.add("lk-tryon-on");
+      }
+      var photo = getCookie("lkTryOnPhoto");
+      if (!photo) return;
+      document.querySelectorAll("[data-tryon-photo]").forEach(function (img) {
+        img.src = photo;
+      });
+    });
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var sendBtn = document.getElementById("lk-send-otp");
+      var registerBtn = document.getElementById("lk-register-send");
+      var verifyBtn = document.getElementById("lk-verify-otp");
+      var step1 = document.getElementById("lk-login-step-1");
+      var stepRegister = document.getElementById("lk-login-step-register");
+      var step2 = document.getElementById("lk-login-step-2");
+      var identifierInput = document.getElementById("lk-login-identifier");
+      var registerIdentifier = document.getElementById("lk-register-identifier");
+      var registerFirst = document.getElementById("lk-register-first");
+      var registerLast = document.getElementById("lk-register-last");
+      var otpInput = document.getElementById("lk-login-otp");
+      var targetLabel = document.getElementById("lk-otp-target");
+      var backBtn = document.getElementById("lk-back-login");
+      var showRegister = document.getElementById("lk-show-register");
+      var showRegister2 = document.getElementById("lk-show-register-2");
+      var showLogin = document.getElementById("lk-show-login");
+      var resendBtn = document.getElementById("lk-resend-otp");
+      var currentIdentifier = "";
+
+      function getCookie(name) {
+        var value = "; " + document.cookie;
+        var parts = value.split("; " + name + "=");
+        if (parts.length === 2) return parts.pop().split(";").shift();
+        return "";
+      }
+
+      function showStep2(identifier) {
+        step1.classList.add("d-none");
+        if (stepRegister) stepRegister.classList.add("d-none");
+        step2.classList.remove("d-none");
+        currentIdentifier = identifier;
+        targetLabel.textContent = "OTP sent to " + identifier;
+      }
+
+      function showStep1() {
+        step2.classList.add("d-none");
+        if (stepRegister) stepRegister.classList.add("d-none");
+        step1.classList.remove("d-none");
+      }
+
+      function showRegisterStep() {
+        step1.classList.add("d-none");
+        step2.classList.add("d-none");
+        if (stepRegister) stepRegister.classList.remove("d-none");
+      }
+
+      function requestOtp(payload, identifier) {
+        fetch("/accounts/api/auth/request-otp/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+          body: JSON.stringify(payload),
+        })
+          .then(function (res) {
+            return res.json().then(function (data) {
+              return { ok: res.ok, data: data };
+            });
+          })
+          .then(function (payload) {
+            if (!payload.ok) {
+              alert(payload.data.detail || "Failed to send OTP.");
+              return;
+            }
+            showStep2(identifier);
+          })
+          .catch(function () {
+            alert("Failed to send OTP.");
+          });
+      }
+
+      if (sendBtn) {
+        sendBtn.addEventListener("click", function () {
+          var identifier = (identifierInput.value || "").trim();
+          var whatsappOptIn = document.getElementById("lk-login-whatsapp");
+          if (!identifier) return;
+          requestOtp(
+            {
+              identifier: identifier,
+              whatsapp_opt_in: whatsappOptIn ? whatsappOptIn.checked : false,
+            },
+            identifier
+          );
+        });
+      }
+
+      if (registerBtn) {
+        registerBtn.addEventListener("click", function () {
+          var identifier = (registerIdentifier.value || "").trim();
+          var first = (registerFirst.value || "").trim();
+          var last = (registerLast.value || "").trim();
+          var whatsappOptIn = document.getElementById("lk-register-whatsapp");
+          if (!identifier) return;
+          requestOtp(
+            {
+              identifier: identifier,
+              first_name: first,
+              last_name: last,
+              whatsapp_opt_in: whatsappOptIn ? whatsappOptIn.checked : false,
+              is_register: true,
+            },
+            identifier
+          );
+        });
+      }
+
+      if (verifyBtn) {
+        verifyBtn.addEventListener("click", function () {
+          var identifier = (identifierInput.value || "").trim() || currentIdentifier;
+          var code = (otpInput.value || "").trim();
+          if (!identifier || !code) return;
+          fetch("/accounts/api/auth/verify-otp/", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": getCookie("csrftoken"),
+            },
+            body: JSON.stringify({ identifier: identifier, code: code }),
+          })
+            .then(function (res) {
+              return res.json().then(function (data) {
+                return { ok: res.ok, data: data };
+              });
+            })
+            .then(function (payload) {
+              if (!payload.ok) {
+                alert(payload.data.detail || "Invalid OTP.");
+                return;
+              }
+              setCookie("access_token", payload.data.access, 7);
+              setCookie("refresh_token", payload.data.refresh, 7);
+              window.location.reload();
+            })
+            .catch(function () {
+              alert("Failed to verify OTP.");
+          });
+        });
+      }
+
+      if (backBtn) {
+        backBtn.addEventListener("click", function () {
+          showStep1();
+        });
+      }
+
+      if (showRegister) {
+        showRegister.addEventListener("click", function (event) {
+          event.preventDefault();
+          showRegisterStep();
+        });
+      }
+      if (showRegister2) {
+        showRegister2.addEventListener("click", function (event) {
+          event.preventDefault();
+          showRegisterStep();
+        });
+      }
+      if (showLogin) {
+        showLogin.addEventListener("click", function (event) {
+          event.preventDefault();
+          showStep1();
+        });
+      }
+      if (resendBtn) {
+        resendBtn.addEventListener("click", function (event) {
+          event.preventDefault();
+          var identifier = (identifierInput.value || "").trim() || (registerIdentifier.value || "").trim() || currentIdentifier;
+          if (!identifier) return;
+          requestOtp({ identifier: identifier }, identifier);
+        });
+      }
+    });
+  </script>
+</body>
+</html>
