@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+import warnings
 from datetime import timedelta
 
 from dotenv import load_dotenv
@@ -20,6 +21,13 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(BASE_DIR / ".env")
+
+# Silence pkg_resources deprecation warning emitted by simplejwt/setuptools.
+warnings.filterwarnings(
+    "ignore",
+    message=r"pkg_resources is deprecated as an API\..*",
+    category=UserWarning,
+)
 
 
 # Quick-start development settings - unsuitable for production

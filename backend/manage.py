@@ -6,6 +6,7 @@ import sys
 
 def main():
     """Run administrative tasks."""
+    os.environ.setdefault("DJANGO_RUNSERVER_HIDE_WARNING", "true")
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lenseshop.settings')
     try:
         from django.core.management import execute_from_command_line
@@ -15,6 +16,8 @@ def main():
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
+    if len(sys.argv) == 2 and sys.argv[1] == "runserver":
+        sys.argv.append("8004")
     execute_from_command_line(sys.argv)
 
 
