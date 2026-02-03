@@ -1,0 +1,15 @@
+services:
+  web:
+    image: ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
+    ports:
+      - "8004:8000"
+    env_file:
+      - backend/.env
+    volumes:
+      - media:/app/backend/media
+      - staticfiles:/app/backend/staticfiles
+    restart: unless-stopped
+
+volumes:
+  media:
+  staticfiles:
