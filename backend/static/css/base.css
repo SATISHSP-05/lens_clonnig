@@ -44,6 +44,38 @@ video {
   display: block;
 }
 
+/* Force consistent sizing for navbar badge logos regardless of load order. */
+.lk-badge,
+.lk-brand-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  line-height: 1;
+}
+.lk-badge img,
+.lk-brand-btn img {
+  height: 18px;
+  max-height: 18px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  display: inline-block;
+}
+
+/* Keep footer store badges compact. */
+.lk-footer img {
+  height: 28px;
+  width: auto;
+}
+
+/* Ensure carousel banners don't stretch vertically. */
+.carousel-item img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
 /* Utility fallbacks so layout stays correct even if Bootstrap CDN is blocked. */
 .d-flex {
   display: flex !important;
@@ -120,6 +152,11 @@ video {
 .lk-header {
   border-bottom: 1px solid #e5e5e5;
   background: #fff;
+}
+.lk-header .navbar-brand img {
+  height: 28px;
+  width: auto;
+  display: block;
 }
 .lk-search {
   border: 1px solid #2b2b2b;
@@ -328,20 +365,26 @@ video {
   background: #fff;
   border: 1px solid #eee;
   border-radius: 16px;
-  padding: 14px;
+  padding: 16px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 140px;
 }
 .lk-cat-card img {
-  max-width: 100%;
-  height: 80px;
+  width: 90px;
+  height: 70px;
   object-fit: contain;
+  display: block;
+  margin: 0 auto;
 }
 .lk-cat-card span {
   display: block;
   margin-top: 8px;
   font-weight: 600;
   color: #5a5a8a;
-  font-size: 14px;
+  font-size: 15px;
 }
 .lk-cat-menu {
   position: absolute;
