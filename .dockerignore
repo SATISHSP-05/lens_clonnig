@@ -1,11 +1,1 @@
-venv
-__pycache__
-*.pyc
-*.pyo
-.git
-*.sqlite3
 .env
-backend/staticfiles
-backend/media
-chunks
-.DS_Store

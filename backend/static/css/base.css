@@ -44,6 +44,36 @@ video {
   display: block;
 }
 
+/* Utility fallbacks so layout stays correct even if Bootstrap CDN is blocked. */
+.d-flex {
+  display: flex !important;
+}
+.flex-wrap {
+  flex-wrap: wrap !important;
+}
+.align-items-center {
+  align-items: center !important;
+}
+.justify-content-between {
+  justify-content: space-between !important;
+}
+.gap-2 {
+  gap: 0.5rem !important;
+}
+.gap-3 {
+  gap: 1rem !important;
+}
+.flex-grow-1 {
+  flex-grow: 1 !important;
+}
+.container-fluid {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(12px, 1.5vw, 32px);
+  padding-right: clamp(12px, 1.5vw, 32px);
+}
+
 @media (max-width: 1200px) {
   .container {
     padding-left: 16px;
