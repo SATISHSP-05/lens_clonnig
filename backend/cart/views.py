@@ -2,6 +2,8 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from urllib.parse import quote
 
 import razorpay
 
@@ -24,6 +26,13 @@ def _get_cart_products(cart_items):
     products = Product.objects.filter(slug__in=cart_items, is_active=True).select_related("brand")
     product_map = {item.slug: item for item in products}
     return [product_map[slug] for slug in cart_items if slug in product_map]
+
+
+def _require_login(request):
+    if request.user.is_authenticated:
+        return None
+    target = quote(request.get_full_path())
+    return redirect(f"{reverse('home')}?login=1&next={target}")
 
 
 def cart_view(request):
@@ -73,6 +82,9 @@ def cart_view(request):
 
 
 def checkout_address_view(request):
+    guard = _require_login(request)
+    if guard:
+        return guard
     session_key = _get_session_key(request)
     if request.user.is_authenticated:
         addresses = CheckoutAddress.objects.filter(user=request.user)
@@ -104,6 +116,9 @@ def checkout_address_view(request):
 
 
 def checkout_address_form_view(request, address_id=None):
+    guard = _require_login(request)
+    if guard:
+        return guard
     session_key = _get_session_key(request)
     address = None
     if address_id:
@@ -166,6 +181,9 @@ def checkout_address_form_view(request, address_id=None):
 
 
 def checkout_address_delete_view(request, address_id):
+    guard = _require_login(request)
+    if guard:
+        return guard
     session_key = _get_session_key(request)
     if request.user.is_authenticated:
         address = get_object_or_404(CheckoutAddress, id=address_id, user=request.user)
@@ -181,6 +199,9 @@ def checkout_address_delete_view(request, address_id):
 
 @ensure_csrf_cookie
 def checkout_payment_view(request):
+    guard = _require_login(request)
+    if guard:
+        return guard
     session_key = _get_session_key(request)
     address_id = request.session.get("checkout_address_id")
     if not address_id:
@@ -208,6 +229,9 @@ def checkout_payment_view(request):
 
 
 def checkout_payment_create_view(request):
+    guard = _require_login(request)
+    if guard:
+        return guard
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed."}, status=405)
 
@@ -273,6 +297,9 @@ def checkout_payment_create_view(request):
 
 
 def checkout_payment_verify_view(request):
+    guard = _require_login(request)
+    if guard:
+        return guard
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed."}, status=405)
 
@@ -317,6 +344,9 @@ def checkout_payment_verify_view(request):
 
 
 def checkout_summary_view(request):
+    guard = _require_login(request)
+    if guard:
+        return guard
     session_key = _get_session_key(request)
     order_id = request.session.get("checkout_order_id")
     if not order_id:
@@ -339,6 +369,9 @@ def checkout_summary_view(request):
 
 
 def order_detail_view(request, order_id):
+    guard = _require_login(request)
+    if guard:
+        return guard
     session_key = _get_session_key(request)
     if request.user.is_authenticated:
         order = get_object_or_404(CheckoutOrder, id=order_id, user=request.user)
@@ -357,6 +390,9 @@ def order_detail_view(request, order_id):
 
 
 def track_orders_view(request):
+    guard = _require_login(request)
+    if guard:
+        return guard
     session_key = _get_session_key(request)
     if request.user.is_authenticated:
         orders = CheckoutOrder.objects.filter(user=request.user).order_by("-created_at")

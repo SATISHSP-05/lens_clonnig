@@ -27,7 +27,7 @@
       <input class="lk-search" type="search" placeholder="What are you looking for?" name="q" aria-label="Search">
     </form>
 
-    <a class="lk-pill" href="{% url 'track_orders' %}">Track Orders</a>
+    <a class="lk-pill" href="{% url 'track_orders' %}" data-auth-required="true">Track Orders</a>
 
     {% if request.user.is_authenticated %}
       <div class="dropdown">
