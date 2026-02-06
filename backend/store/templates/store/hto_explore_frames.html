@@ -489,6 +489,21 @@
 
     lkMap.fitBounds(bounds);
   }
+
+  window.addEventListener("load", function () {
+    setTimeout(function () {
+      if (window.google && google.maps) {
+        return;
+      }
+      if (offlineCount) {
+        var count = document.getElementById("lk-store-count");
+        if (count) {
+          count.textContent = "Showing " + offlineCount + " offline stores.";
+        }
+        toggleOfflineSection(true);
+      }
+    }, 500);
+  });
 </script>
 <script
   src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAj6ie6g8OdhA8UXpQiJi9X3hHLUQIpm0U&libraries=places&callback=initStoresMap"

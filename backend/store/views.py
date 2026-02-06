@@ -68,17 +68,23 @@ def _load_store_data(limit=20):
         return stores
 
     try:
-        with STORE_DATA_FILE.open(newline="", encoding="utf-8") as csvfile:
+        with STORE_DATA_FILE.open(newline="", encoding="utf-8-sig", errors="replace") as csvfile:
             reader = csv.reader(csvfile)
             next(reader, None)
             for row in reader:
                 if not row or len(row) < 3:
                     continue
                 name = row[0].strip()
+                if not name:
+                    continue
                 address_segments = [segment.strip("· ").strip() for segment in row[2].split("·") if segment.strip()]
+                raw_details = row[2].replace("Â·", "·")
+                address_segments = [segment.strip("· ").strip() for segment in raw_details.split("·") if segment.strip()]
+                address_segments = [segment.strip() for segment in re.split(r"\s*Â·\s*|\s*·\s*", row[2]) if segment.strip()]
                 address = address_segments[0] if address_segments else ""
                 phone = address_segments[1] if len(address_segments) > 1 else ""
                 closing = row[3].replace("·", "").strip() if len(row) > 3 else ""
+                closing = row[3].replace("Â·", "·").replace("Ã‚Â·", "·").strip("· ").strip() if len(row) > 3 else ""
                 status = row[4].strip() if len(row) > 4 else ""
                 store_url = row[10].strip() if len(row) > 10 else ""
                 directions_url = row[12].strip() if len(row) > 12 else ""
@@ -98,6 +104,53 @@ def _load_store_data(limit=20):
                     break
     except Exception:
         pass
+    return stores
+
+
+def _load_store_data_clean(limit=20):
+    stores = []
+    if not STORE_DATA_FILE.exists():
+        return stores
+
+    try:
+        with STORE_DATA_FILE.open(newline="", encoding="utf-8-sig", errors="replace") as csvfile:
+            reader = csv.reader(csvfile)
+            next(reader, None)
+            for row in reader:
+                if not row or len(row) < 3:
+                    continue
+                name = row[0].strip()
+                if not name:
+                    continue
+                raw_details = row[2]
+                for token in ("Ãƒâ€šÃ‚Â·", "Ã‚Â·", "Â·"):
+                    raw_details = raw_details.replace(token, "·")
+                address_segments = [segment.strip("· ").strip() for segment in raw_details.split("·") if segment.strip()]
+                address = address_segments[0] if address_segments else ""
+                phone = address_segments[1] if len(address_segments) > 1 else ""
+                closing = row[3] if len(row) > 3 else ""
+                for token in ("Ãƒâ€šÃ‚Â·", "Ã‚Â·", "Â·"):
+                    closing = closing.replace(token, "·")
+                closing = closing.strip("· ").strip()
+                status = row[4].strip() if len(row) > 4 else ""
+                store_url = row[10].strip() if len(row) > 10 else ""
+                directions_url = row[12].strip() if len(row) > 12 else ""
+
+                stores.append(
+                    {
+                        "name": name,
+                        "address": address,
+                        "phone": phone,
+                        "closing": closing,
+                        "status": status,
+                        "store_url": store_url,
+                        "directions_url": directions_url,
+                    }
+                )
+                if len(stores) >= limit:
+                    break
+    except Exception:
+        return []
     return stores
 
 
@@ -230,9 +283,15 @@ def _build_filtered_products(request, base_products, fixed_shapes=None, fixed_ge
         if price_q:
             products = products.filter(price_q)
 
-    products = products.order_by("id")
-
-    products = products.order_by("id")
+    sort_value = request.GET.get("sort", "best")
+    sort_map = {
+        "best": "id",
+        "price_low": "base_price",
+        "price_high": "-base_price",
+        "new": "-created_at",
+        "most_viewed": "-id",
+    }
+    products = products.order_by(sort_map.get(sort_value, "id"))
 
     available_shapes = set(filter_base.values_list("shape", flat=True))
     available_frame_types = set(filter_base.values_list("frame_type", flat=True))
@@ -284,6 +343,7 @@ def _build_filtered_products(request, base_products, fixed_shapes=None, fixed_ge
         "selected_weights": selected_weights,
         "selected_prices": selected_prices,
         "filter_query": filter_params.urlencode(),
+        "sort_value": sort_value,
     }
     return products, context
 
@@ -410,9 +470,32 @@ def product_detail_view(request, slug):
 
 def shape_gender_view(request, shape, gender):
     category_slug = request.GET.get("category")
-    base_products = Product.objects.filter(is_active=True, shape=shape, gender=gender)
+    category_obj = None
+    if category_slug:
+        category_obj = Category.objects.filter(slug=category_slug, active=True).first()
+        if not category_obj:
+            category_slug = None
+    normalized_shape = (shape or "").replace("_", "-").lower()
+    normalized_gender = (gender or "").lower()
+    base_products = Product.objects.filter(
+        is_active=True,
+        shape=normalized_shape,
+        gender__in=[normalized_gender, "unisex"],
+    )
     if category_slug:
         base_products = base_products.filter(category__slug=category_slug)
+    if not base_products.exists():
+        # Drop gender filter if none match.
+        base_products = Product.objects.filter(is_active=True, shape=normalized_shape)
+        if category_slug:
+            base_products = base_products.filter(category__slug=category_slug)
+    if not base_products.exists():
+        base_products = Product.objects.filter(is_active=True)
+        if category_slug:
+            base_products = base_products.filter(category__slug=category_slug)
+    if not base_products.exists() and category_slug:
+        # Last resort: drop category filter if it produces zero results.
+        base_products = Product.objects.filter(is_active=True)
     products, filter_context = _build_filtered_products(
         request,
         base_products,
@@ -425,9 +508,7 @@ def shape_gender_view(request, shape, gender):
 
     shape_label = dict(Product.SHAPE_CHOICES).get(shape, shape)
     gender_label = dict(Product.GENDER_CHOICES).get(gender, gender)
-    category = None
-    if category_slug:
-        category = Category.objects.filter(slug=category_slug, active=True).first()
+    category = category_obj
     if not category:
         category = Category.objects.filter(slug="eyeglasses", active=True).first()
     category_label = category.name if category else "Eyeglasses"
@@ -529,7 +610,7 @@ def hto_location_unavailable_view(request):
 
 
 def hto_explore_frames_view(request):
-    store_data = _load_store_data()
+    store_data = _load_store_data_clean()
     return render(request, "store/hto_explore_frames.html", {"store_data": store_data})
 
 

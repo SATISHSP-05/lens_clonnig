@@ -34,6 +34,36 @@
     function deleteCookie(name) {
       document.cookie = name + "=; Max-Age=0; path=/";
     }
+
+    function setTryOnPhoto(dataUrl) {
+      try {
+        localStorage.setItem("lkTryOnPhoto", dataUrl);
+      } catch (e) {
+        // Ignore and fall back.
+      }
+      try {
+        sessionStorage.setItem("lkTryOnPhoto", dataUrl);
+      } catch (e) {
+        // Ignore and fall back.
+      }
+      setCookie("lkTryOnPhoto", dataUrl, 1);
+    }
+
+    function getTryOnPhoto() {
+      try {
+        var value = localStorage.getItem("lkTryOnPhoto");
+        if (value) return value;
+      } catch (e) {
+        // Ignore and fall back.
+      }
+      try {
+        var sessionValue = sessionStorage.getItem("lkTryOnPhoto");
+        if (sessionValue) return sessionValue;
+      } catch (e) {
+        // Ignore and fall back.
+      }
+      return getCookie("lkTryOnPhoto");
+    }
   </script>
 
   <script>
@@ -114,13 +144,19 @@
         takeBtn.addEventListener("click", function () {
           var width = video.videoWidth || 640;
           var height = video.videoHeight || 480;
+          var maxWidth = 640;
+          if (width > maxWidth) {
+            var scale = maxWidth / width;
+            width = Math.round(width * scale);
+            height = Math.round(height * scale);
+          }
           canvas.width = width;
           canvas.height = height;
           var ctx = canvas.getContext("2d");
           ctx.drawImage(video, 0, 0, width, height);
-          var dataUrl = canvas.toDataURL("image/png");
+          var dataUrl = canvas.toDataURL("image/jpeg", 0.85);
           thumb.src = dataUrl;
-          setCookie("lkTryOnPhoto", dataUrl, 7);
+          setTryOnPhoto(dataUrl);
           showStep(2);
         });
       }
@@ -154,12 +190,76 @@
       if (tryon) {
         document.body.classList.add("lk-tryon-on");
       }
-      var photo = getCookie("lkTryOnPhoto");
+      var photo = getTryOnPhoto();
       if (!photo) return;
       document.querySelectorAll("[data-tryon-photo]").forEach(function (img) {
         img.src = photo;
       });
     });
+  </script>
+  <script type="module">
+    const tryOnEnabled = document.body.classList.contains("lk-tryon-on");
+    if (tryOnEnabled) {
+      const photoData = getTryOnPhoto();
+      if (photoData) {
+        const { FaceLandmarker, FilesetResolver } = await import(
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3"
+        );
+        const vision = await FilesetResolver.forVisionTasks(
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
+        );
+        const landmarker = await FaceLandmarker.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath:
+              "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/face_landmarker.task",
+          },
+          runningMode: "IMAGE",
+          numFaces: 1,
+        });
+
+        const sourceImage = new Image();
+        sourceImage.src = photoData;
+        sourceImage.onload = () => {
+          const result = landmarker.detect(sourceImage);
+          if (!result.faceLandmarks || result.faceLandmarks.length === 0) return;
+          const lm = result.faceLandmarks[0];
+          const leftEye = lm[33];
+          const leftEyeInner = lm[133];
+          const rightEyeInner = lm[362];
+          const rightEye = lm[263];
+          const leftX = (leftEye.x + leftEyeInner.x) / 2;
+          const leftY = (leftEye.y + leftEyeInner.y) / 2;
+          const rightX = (rightEye.x + rightEyeInner.x) / 2;
+          const rightY = (rightEye.y + rightEyeInner.y) / 2;
+          const midX = (leftX + rightX) / 2;
+          const midY = (leftY + rightY) / 2;
+          const eyeDx = rightX - leftX;
+          const eyeDy = rightY - leftY;
+          const angle = Math.atan2(eyeDy, eyeDx) * (180 / Math.PI);
+
+          document.querySelectorAll("[data-tryon-photo]").forEach((photoEl) => {
+            const frame = photoEl.closest(".lk-tryon-frame");
+            if (!frame) return;
+            const glasses = frame.querySelector(".lk-tryon-glasses");
+            if (!glasses) return;
+            const rect = photoEl.getBoundingClientRect();
+            const displayWidth = rect.width || photoEl.clientWidth;
+            const displayHeight = rect.height || photoEl.clientHeight;
+            if (!displayWidth || !displayHeight) return;
+
+            const pxX = midX * displayWidth;
+            const pxY = midY * displayHeight;
+            const eyeDist = Math.hypot(eyeDx * displayWidth, eyeDy * displayHeight);
+            const glassesWidth = Math.max(eyeDist * 2.2, 120);
+
+            glasses.style.width = `${glassesWidth}px`;
+            glasses.style.left = `${pxX}px`;
+            glasses.style.top = `${pxY}px`;
+            glasses.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+          });
+        };
+      }
+    }
   </script>
   <script>
     document.addEventListener("DOMContentLoaded", function () {

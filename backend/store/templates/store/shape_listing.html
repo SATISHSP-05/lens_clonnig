@@ -177,12 +177,12 @@
       </div>
       <div class="d-flex align-items-center gap-2">
         <span class="small fw-semibold">Sort By</span>
-        <select class="form-select form-select-sm" style="width: 160px;">
-          <option>Best Sellers</option>
-          <option>Price: Low to High</option>
-          <option>Price: High to Low</option>
-          <option>New</option>
-          <option>Most Viewed</option>
+        <select class="form-select form-select-sm" style="width: 160px;" id="lk-sort-select">
+          <option value="best" {% if sort_value == "best" %}selected{% endif %}>Best Sellers</option>
+          <option value="price_low" {% if sort_value == "price_low" %}selected{% endif %}>Price: Low to High</option>
+          <option value="price_high" {% if sort_value == "price_high" %}selected{% endif %}>Price: High to Low</option>
+          <option value="new" {% if sort_value == "new" %}selected{% endif %}>New</option>
+          <option value="most_viewed" {% if sort_value == "most_viewed" %}selected{% endif %}>Most Viewed</option>
         </select>
       </div>
     </div>
@@ -390,6 +390,19 @@
 </div>
 
 {% endblock %}
+
+<script>
+  (function () {
+    var select = document.getElementById("lk-sort-select");
+    if (!select) return;
+    select.addEventListener("change", function () {
+      var url = new URL(window.location.href);
+      url.searchParams.set("sort", select.value);
+      url.searchParams.delete("page");
+      window.location.href = url.toString();
+    });
+  })();
+</script>
 
 {% block extra_js %}
 <script>
