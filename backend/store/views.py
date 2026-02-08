@@ -159,6 +159,31 @@ def _format_delivery_date(days):
     return delivery_date.strftime("%a %b %d %Y")
 
 
+def _normalize_genders(selected):
+    if not selected:
+        return []
+    mapping = {
+        "female": "women",
+        "woman": "women",
+        "women": "women",
+        "male": "men",
+        "man": "men",
+        "men": "men",
+        "kid": "kids",
+        "kids": "kids",
+        "child": "kids",
+        "children": "kids",
+        "unisex": "unisex",
+    }
+    normalized = []
+    for item in selected:
+        key = (item or "").strip().lower()
+        if not key:
+            continue
+        normalized.append(mapping.get(key, key))
+    return list(dict.fromkeys(normalized))
+
+
 def _pincode_payload(record):
     return {
         "pincode": record.pincode,
@@ -248,14 +273,14 @@ def _build_filtered_products(request, base_products, fixed_shapes=None, fixed_ge
     selected_colors = request.GET.getlist("color")
     selected_sizes = request.GET.getlist("size")
     selected_prices = request.GET.getlist("price")
-    selected_genders = request.GET.getlist("gender")
+    selected_genders = _normalize_genders(request.GET.getlist("gender"))
     selected_materials = request.GET.getlist("material")
     selected_weights = request.GET.getlist("weight_group")
 
     if fixed_shapes:
         selected_shapes = list(fixed_shapes)
     if fixed_genders:
-        selected_genders = list(fixed_genders)
+        selected_genders = _normalize_genders(list(fixed_genders))
 
     products = filter_base
     if selected_brands:
@@ -265,7 +290,10 @@ def _build_filtered_products(request, base_products, fixed_shapes=None, fixed_ge
     if selected_frame_types:
         products = products.filter(frame_type__in=selected_frame_types)
     if selected_genders:
-        products = products.filter(gender__in=selected_genders)
+        gender_filter = list(selected_genders)
+        if "unisex" not in gender_filter:
+            gender_filter.append("unisex")
+        products = products.filter(gender__in=gender_filter)
     if selected_materials:
         products = products.filter(frame_material__in=selected_materials)
     if selected_colors:
@@ -368,7 +396,7 @@ def category_view(request, slug):
     selected_colors = request.GET.getlist("color")
     selected_sizes = request.GET.getlist("size")
     selected_prices = request.GET.getlist("price")
-    selected_genders = request.GET.getlist("gender")
+    selected_genders = _normalize_genders(request.GET.getlist("gender"))
     selected_materials = request.GET.getlist("material")
     selected_weights = request.GET.getlist("weight_group")
 
@@ -379,7 +407,10 @@ def category_view(request, slug):
     if selected_frame_types:
         products = products.filter(frame_type__in=selected_frame_types)
     if selected_genders:
-        products = products.filter(gender__in=selected_genders)
+        gender_filter = list(selected_genders)
+        if "unisex" not in gender_filter:
+            gender_filter.append("unisex")
+        products = products.filter(gender__in=gender_filter)
     if selected_materials:
         products = products.filter(frame_material__in=selected_materials)
     if selected_colors:
@@ -546,17 +577,7 @@ def product_search_view(request):
             query_q |= Q(color__icontains=term)
         products = products.filter(query_q)
 
-    brand_slug = request.GET.get("brand")
-    shape = request.GET.get("shape")
-    gender = request.GET.get("gender")
-    if brand_slug:
-        products = products.filter(brand__slug=brand_slug)
-    if shape:
-        products = products.filter(shape=shape)
-    if gender:
-        products = products.filter(gender=gender)
-
-    products = products.order_by("id")
+    products, filter_context = _build_filtered_products(request, products)
 
     paginator = Paginator(products, 12)
     page_number = request.GET.get('page')
@@ -565,12 +586,8 @@ def product_search_view(request):
     context = {
         'query': query,
         'page_obj': page_obj,
-        'brands': Brand.objects.filter(active=True),
-        'selected_brand': brand_slug,
-        'selected_shape': shape,
-        'selected_gender': gender,
-        'shape_choices': Product.SHAPE_CHOICES,
     }
+    context.update(filter_context)
     return render(request, 'store/search_results.html', context)
 
 
