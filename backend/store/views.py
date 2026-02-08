@@ -236,6 +236,9 @@ def pincode_check_view(request):
     if record:
         return JsonResponse(_pincode_payload(record))
 
+    if not getattr(settings, "PINCODE_USE_EXTERNAL", False):
+        return JsonResponse({"error": "Pincode not serviceable."}, status=404)
+
     external_data, error = _fetch_external_pincode(pin)
     if error:
         status = 404 if error == "Pincode not serviceable." else 502

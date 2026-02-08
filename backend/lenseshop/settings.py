@@ -163,6 +163,7 @@ SERVE_MEDIA_FILES = os.getenv("SERVE_MEDIA_FILES", "True").lower() == "true"
 PINCODE_API_URL = "https://api.postalpincode.in/pincode/{pincode}"
 PINCODE_DEFAULT_DELIVERY_DAYS = 3
 PINCODE_VERIFY_SSL = False
+PINCODE_USE_EXTERNAL = False
 
 RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "")
