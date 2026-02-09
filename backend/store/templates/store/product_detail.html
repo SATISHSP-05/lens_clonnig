@@ -119,6 +119,15 @@
     margin-top: 6px;
     font-size: 13px;
   }
+  .lk-pincode-note {
+    font-weight: 600;
+  }
+  .lk-pincode-note.ok {
+    color: #1aa59a;
+  }
+  .lk-pincode-note.bad {
+    color: #d9534f;
+  }
   .lk-link {
     color: #1aa59a;
     font-weight: 600;
@@ -196,7 +205,7 @@
             <div class="lk-pincode-meta">
               <div>(Free)</div>
               <div data-pincode-date></div>
-              <div class="text-muted">Delivery time not applicable for progressive and high power.</div>
+              <div class="lk-pincode-note" data-pincode-note></div>
             </div>
           </div>
         </details>
@@ -225,6 +234,7 @@
     var result = document.querySelector("[data-pincode-result]");
     var value = document.querySelector("[data-pincode-value]");
     var dateEl = document.querySelector("[data-pincode-date]");
+    var noteEl = document.querySelector("[data-pincode-note]");
     var changeBtn = document.querySelector("[data-pincode-change]");
     var error = document.querySelector("[data-pincode-error]");
 
@@ -268,12 +278,25 @@
     }
 
     function setResult(payload) {
+      var serviceable = payload.serviceable !== false;
       value.textContent = payload.pincode || input.value.trim();
       if (payload.delivery_date) {
         dateEl.textContent = payload.delivery_date;
-      } else {
+      } else if (serviceable) {
         var fallbackDays = payload.delivery_days || 3;
         dateEl.textContent = formatDate(addDays(fallbackDays));
+      } else {
+        dateEl.textContent = "";
+      }
+      if (noteEl) {
+        noteEl.classList.remove("ok", "bad");
+        if (serviceable) {
+          noteEl.textContent = "Delivery time applicable for progressive and high power.";
+          noteEl.classList.add("ok");
+        } else {
+          noteEl.textContent = "Delivery time not applicable for progressive and high power.";
+          noteEl.classList.add("bad");
+        }
       }
       setState(true);
     }
@@ -291,11 +314,19 @@
         })
         .then(function (result) {
           if (!result.ok) {
-            showError(true, result.data && result.data.error ? result.data.error : "Unable to check pincode.");
+            var apiError = result.data && result.data.error ? result.data.error : "Unable to check pincode.";
+            if (apiError === "Pincode not serviceable.") {
+              showError(false);
+              setResult({ pincode: pin, serviceable: false });
+              return;
+            }
+            showError(true, apiError);
             return;
           }
           showError(false);
-          setResult(result.data || {});
+          var payload = result.data || {};
+          payload.serviceable = true;
+          setResult(payload);
         })
         .catch(function () {
           showError(true, "Unable to reach the delivery service.");
