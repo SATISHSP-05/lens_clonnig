@@ -97,6 +97,14 @@ jobs:
           envs: AWS_REGION,ECR_REGISTRY,ECR_REPOSITORY,IMAGE_TAG,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_SESSION_TOKEN,EC2_APP_DIR,EC2_REPO_URL,EC2_DATA_DIR
           script: |
             set -e
+            export AWS_REGION="${{ secrets.AWS_REGION }}"
+            export ECR_REGISTRY="${{ secrets.ECR_REGISTRY }}"
+            export ECR_REPOSITORY="${{ secrets.ECR_REPOSITORY }}"
+            export IMAGE_TAG="${{ github.sha }}"
+            export EC2_APP_DIR="${{ secrets.EC2_APP_DIR }}"
+            export EC2_REPO_URL="${{ secrets.EC2_REPO_URL }}"
+            export EC2_DATA_DIR="${{ secrets.EC2_DATA_DIR }}"
+
             if [ -z "$EC2_APP_DIR" ]; then
               echo "EC2_APP_DIR is not set."
               exit 1
