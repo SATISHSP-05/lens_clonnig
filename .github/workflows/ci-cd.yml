@@ -126,7 +126,7 @@ jobs:
             git reset --hard origin/main
             git clean -fd
 
-            sudo docker compose -f docker-compose.prod.yml pull
-            sudo docker compose -f docker-compose.prod.yml up -d --remove-orphans
-            sudo docker compose -f docker-compose.prod.yml exec -T web python manage.py migrate --noinput
-            sudo docker compose -f docker-compose.prod.yml exec -T web python manage.py collectstatic --noinput
+            sudo -E docker compose -f docker-compose.prod.yml pull
+            sudo -E docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            sudo -E docker compose -f docker-compose.prod.yml exec -T web python manage.py migrate --noinput
+            sudo -E docker compose -f docker-compose.prod.yml exec -T web python manage.py collectstatic --noinput
