@@ -56,6 +56,10 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           set -euo pipefail
+          ECR_REGISTRY="$(echo "$ECR_REGISTRY" | tr -d '\r\n')"
+          ECR_REPOSITORY="$(echo "$ECR_REPOSITORY" | tr -d '\r\n')"
+          ECR_REGISTRY="${ECR_REGISTRY#https://}"
+          ECR_REGISTRY="${ECR_REGISTRY%/}"
           echo "ECR_REGISTRY=$ECR_REGISTRY"
           echo "ECR_REPOSITORY=$ECR_REPOSITORY"
           echo "IMAGE_TAG=$IMAGE_TAG"
