@@ -6,10 +6,10 @@ services:
     env_file:
       - backend/.env
     volumes:
-      - media:/app/backend/media
+      - ${EC2_DATA_DIR}/db.sqlite3:/app/backend/db.sqlite3
+      - ${EC2_DATA_DIR}/media:/app/backend/media
       - staticfiles:/app/backend/staticfiles
     restart: unless-stopped
 
 volumes:
-  media:
   staticfiles:

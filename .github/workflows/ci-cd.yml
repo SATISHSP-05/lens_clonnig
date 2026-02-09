@@ -100,11 +100,11 @@ jobs:
             aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "$ECR_REGISTRY"
 
             cd "$EC2_APP_DIR"
-            git stash push -u -m "ci-cd-auto-stash" || true
-            git pull --rebase
-            git stash pop || true
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd
 
-            docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml up -d --remove-orphans
-            docker compose -f docker-compose.prod.yml exec -T web python manage.py migrate --noinput
-            docker compose -f docker-compose.prod.yml exec -T web python manage.py collectstatic --noinput
+            sudo docker compose -f docker-compose.prod.yml pull
+            sudo docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            sudo docker compose -f docker-compose.prod.yml exec -T web python manage.py migrate --noinput
+            sudo docker compose -f docker-compose.prod.yml exec -T web python manage.py collectstatic --noinput
